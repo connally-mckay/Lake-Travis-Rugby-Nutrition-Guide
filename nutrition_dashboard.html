@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LT Rugby Nutrition Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 3px solid #e94560;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #e94560;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #ddd;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .protocol-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .protocol-btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: 2px solid #e94560;
+            background: #000000;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .protocol-btn:hover {
+            background: #e94560;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(233, 69, 96, 0.4);
+        }
+
+        .protocol-btn.active {
+            background: #e94560;
+            border-color: #fff;
+            box-shadow: 0 6px 12px rgba(233, 69, 96, 0.6);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(233, 69, 96, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(233, 69, 96, 0.3);
+            border-color: rgba(233, 69, 96, 0.6);
+        }
+
+        .card h2 {
+            color: #e94560;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            border-bottom: 2px solid rgba(233, 69, 96, 0.5);
+            padding-bottom: 0.5rem;
+        }
+
+        .card h3 {
+            color: #ffffff;
+            margin: 1rem 0 0.5rem 0;
+            font-size: 1.2rem;
+        }
+
+        .meal-option {
+            background: rgba(10, 10, 10, 0.7);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #e94560;
+        }
+
+        .meal-option h4 {
+            color: #e94560;
+            margin-bottom: 0.5rem;
+        }
+
+        .meal-option ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .meal-option li {
+            padding: 0.25rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .meal-option li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #e94560;
+        }
+
+        .calories {
+            display: inline-block;
+            background: #e94560;
+            color: #fff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat-box {
+            background: rgba(10, 10, 10, 0.8);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid rgba(233, 69, 96, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e94560;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #ddd;
+            margin-top: 0.25rem;
+        }
+
+        .supplement-card {
+            background: rgba(20, 20, 20, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+        }
+
+        .supplement-card h4 {
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .tier-1 { background: #27ae60; }
+        .tier-2 { background: #f39c12; }
+        .tier-3 { background: #3498db; }
+        .tier-4 { background: #9b59b6; }
+
+        .price-tag {
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .shopping-list {
+            background: rgba(10, 10, 10, 0.6);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .shopping-list h4 {
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .shopping-list ul {
+            list-style: none;
+        }
+
+        .shopping-list li {
+            padding: 0.25rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .shopping-list li:before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            color: #e94560;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(10, 10, 10, 0.8);
+            border: 2px solid rgba(233, 69, 96, 0.3);
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: rgba(233, 69, 96, 0.3);
+        }
+
+        .tab-btn.active {
+            background: #e94560;
+            border-color: #e94560;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .food-quality-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin: 0.25rem;
+        }
+
+        .premium { background: #27ae60; }
+        .solid { background: #f39c12; }
+        .convenience { background: #95a5a6; }
+
+        .tips-box {
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.2) 0%, rgba(20, 20, 20, 0.6) 100%);
+            border: 2px solid rgba(233, 69, 96, 0.5);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .tips-box h3 {
+            color: #e94560;
+            margin-bottom: 1rem;
+        }
+
+        .tips-box ul {
+            list-style: none;
+        }
+
+        .tips-box li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .tips-box li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .protocol-btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+
+        .warning-box {
+            background: rgba(231, 76, 60, 0.2);
+            border: 2px solid rgba(231, 76, 60, 0.5);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .warning-box h4 {
+            color: #e74c3c;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-indicator {
+            background: rgba(39, 174, 96, 0.2);
+            border: 2px solid rgba(39, 174, 96, 0.5);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .success-indicator h4 {
+            color: #27ae60;
+            margin-bottom: 0.5rem;
+        }
+
+        .tracker-section {
+            margin-top: 2rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(10, 10, 10, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏉 LAKE TRAVIS RUGBY NUTRITION COMMAND CENTER</h1>
+        <p>Your Complete Performance Nutrition System</p>
+    </div>
+
+    <div class="container">
+        <!-- Protocol Selector -->
+        <div class="protocol-selector">
+            <button class="protocol-btn active" onclick="switchProtocol('weight-gain')">💪 Weight Gain</button>
+            <button class="protocol-btn" onclick="switchProtocol('maintenance')">⚡ Maintenance</button>
+            <button class="protocol-btn" onclick="switchProtocol('supplements')">💊 Supplements</button>
+            <button class="protocol-btn" onclick="switchProtocol('food-quality')">🌟 Food Quality</button>
+        </div>
+
+        <!-- Weight Gain Protocol -->
+        <div id="weight-gain" class="protocol-content">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-number">3500-4000</span>
+                    <span class="stat-label">Daily Calories</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">0.5-1 lb</span>
+                    <span class="stat-label">Weekly Gain</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">200g+</span>
+                    <span class="stat-label">Protein/Day</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">8-12</span>
+                    <span class="stat-label">Weeks to Results</span>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Breakfast -->
+                <div class="card">
+                    <h2>🌅 BREAKFAST OPTIONS</h2>
+                    
+                    <div class="meal-option">
+                        <h4>Option A - Home Breakfast</h4>
+                        <ul>
+                            <li>4 whole eggs in grass-fed butter</li>
+                            <li>2-3 slices bacon</li>
+                            <li>2 sourdough toast + butter</li>
+                            <li>1 banana</li>
+                            <li>16oz kefir or whole milk</li>
+                        </ul>
+                        <span class="calories">900-1000 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Option B - Breakfast Tacos</h4>
+                        <ul>
+                            <li>3 breakfast tacos (egg, potato, cheese, meat)</li>
+                            <li>1 apple or banana</li>
+                            <li>16oz kefir or protein shake</li>
+                        </ul>
+                        <span class="calories">850-950 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Option C - Smoothie Blitz</h4>
+                        <ul>
+                            <li>2 cups milk or kefir</li>
+                            <li>2 scoops protein powder</li>
+                            <li>1 banana</li>
+                            <li>2 tbsp peanut butter</li>
+                            <li>1 cup oats</li>
+                            <li>Handful spinach</li>
+                        </ul>
+                        <span class="calories">900-1000 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Option D - Sourdough Power</h4>
+                        <ul>
+                            <li>3-4 sourdough toast + grass-fed butter</li>
+                            <li>3-4 eggs cooked in butter</li>
+                            <li>Avocado slices</li>
+                            <li>Turkey sausage or bacon</li>
+                        </ul>
+                        <span class="calories">900-1000 cal</span>
+                    </div>
+                </div>
+
+                <!-- Lunch -->
+                <div class="card">
+                    <h2>🍔 LUNCH OPTIONS</h2>
+                    
+                    <div class="meal-option">
+                        <h4>School Cafeteria Strategy</h4>
+                        <ul>
+                            <li>2 entrees if possible (double protein)</li>
+                            <li>Pile on vegetables</li>
+                            <li>Both carb and protein</li>
+                            <li>Chocolate milk</li>
+                            <li>Add snacks from bag</li>
+                        </ul>
+                        <span class="calories">800-1000 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Chipotle</h4>
+                        <ul>
+                            <li>Double meat bowl</li>
+                            <li>Rice, beans, cheese, guac</li>
+                            <li>Chips</li>
+                        </ul>
+                        <span class="calories">~1200 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Chick-fil-A</h4>
+                        <ul>
+                            <li>2 spicy chicken sandwiches</li>
+                            <li>Large fries</li>
+                            <li>Milkshake</li>
+                        </ul>
+                        <span class="calories">~1500 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Pack Your Own (Budget)</h4>
+                        <ul>
+                            <li>2 turkey/ham sandwiches</li>
+                            <li>3-4 string cheese</li>
+                            <li>2oz mixed nuts</li>
+                            <li>2 pieces fruit</li>
+                            <li>Protein bar</li>
+                        </ul>
+                        <span class="calories">900-1100 cal</span>
+                    </div>
+                </div>
+
+                <!-- Dinner -->
+                <div class="card">
+                    <h2>🍖 DINNER OPTIONS</h2>
+                    
+                    <div class="meal-option">
+                        <h4>Standard Dinner</h4>
+                        <ul>
+                            <li>10oz grilled chicken thighs</li>
+                            <li>2 cups white rice + butter</li>
+                            <li>Roasted broccoli + olive oil</li>
+                            <li>1 whole avocado</li>
+                            <li>Glass of milk</li>
+                        </ul>
+                        <span class="calories">~1100 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Red Meat Night</h4>
+                        <ul>
+                            <li>8oz burger patties</li>
+                            <li>Large baked potato + butter/cheese</li>
+                            <li>Side salad + olive oil</li>
+                            <li>Sourdough bread + butter</li>
+                        </ul>
+                        <span class="calories">~1100 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Wild Game (If Available)</h4>
+                        <ul>
+                            <li>10oz venison backstrap</li>
+                            <li>2 cups mashed potatoes + butter</li>
+                            <li>Roasted vegetables</li>
+                            <li>Avocado (venison is lean)</li>
+                        </ul>
+                        <span class="calories">~1000 cal</span>
+                        <span class="food-quality-badge premium">PREMIUM</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Fish Night</h4>
+                        <ul>
+                            <li>8-10oz wild-caught salmon</li>
+                            <li>2 cups rice + butter</li>
+                            <li>Roasted asparagus</li>
+                            <li>Sweet potato + butter</li>
+                        </ul>
+                        <span class="calories">~1000 cal</span>
+                        <span class="food-quality-badge premium">PREMIUM</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Quick Budget Bowl</h4>
+                        <ul>
+                            <li>Beef taco bowl: meat, rice, beans</li>
+                            <li>Cheese, avocado, salsa</li>
+                            <li>Side of roasted potatoes</li>
+                        </ul>
+                        <span class="calories">~1100 cal</span>
+                    </div>
+                </div>
+
+                <!-- Snacks -->
+                <div class="card">
+                    <h2>🥤 SNACKS & TIMING</h2>
+                    
+                    <h3>Afternoon Snack (Critical)</h3>
+                    <div class="meal-option">
+                        <h4>Right After School</h4>
+                        <ul>
+                            <li>Protein shake: 2 scoops + milk + banana</li>
+                            <li>OR: PB&J + protein shake</li>
+                            <li>OR: Greek yogurt + granola + berries</li>
+                        </ul>
+                        <span class="calories">450-600 cal</span>
+                    </div>
+
+                    <h3>Evening Snack (Before Bed)</h3>
+                    <div class="meal-option">
+                        <h4>Option A - Cottage Cheese Bowl</h4>
+                        <ul>
+                            <li>1.5 cups cottage cheese</li>
+                            <li>Berries</li>
+                            <li>2 tbsp almond butter</li>
+                        </ul>
+                        <span class="calories">~500 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Option B - Casein Shake</h4>
+                        <ul>
+                            <li>2 scoops casein protein</li>
+                            <li>12oz milk or kefir</li>
+                            <li>1 tbsp peanut butter</li>
+                        </ul>
+                        <span class="calories">~500 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Option C - Greek Yogurt Bowl</h4>
+                        <ul>
+                            <li>2 cups Greek yogurt</li>
+                            <li>Berries or banana</li>
+                            <li>Granola or nuts</li>
+                            <li>Drizzle of honey</li>
+                        </ul>
+                        <span class="calories">~500 cal</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tips-box">
+                <h3>💡 Weight Gain Success Tips</h3>
+                <ul>
+                    <li>Gaining 0.5-1 lb per week = success (2+ lbs/week = too fast)</li>
+                    <li>Strength should increase in gym consistently</li>
+                    <li>Energy should stay high (if exhausted, eat more)</li>
+                    <li>Abs shouldn't completely disappear (if they do, slow down)</li>
+                    <li>Track weight same time each week (morning, after bathroom)</li>
+                    <li>Meal prep Sunday = guarantee you hit targets</li>
+                    <li>Protein shakes are your friend for hitting calories</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Maintenance Protocol -->
+        <div id="maintenance" class="protocol-content" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-number">3000-3500</span>
+                    <span class="stat-label">Daily Calories</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">±2 lbs</span>
+                    <span class="stat-label">Weight Range</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">180g+</span>
+                    <span class="stat-label">Protein/Day</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">1+ gal</span>
+                    <span class="stat-label">Water Daily</span>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>🌅 MAINTENANCE BREAKFAST</h2>
+                    
+                    <div class="meal-option">
+                        <h4>Balanced Start</h4>
+                        <ul>
+                            <li>3 whole eggs + 2 egg whites</li>
+                            <li>2 sourdough toast</li>
+                            <li>1 banana or berries</li>
+                            <li>Coffee with splash milk</li>
+                        </ul>
+                        <span class="calories">600-650 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Oatmeal Power Bowl</h4>
+                        <ul>
+                            <li>1.5 cups oatmeal</li>
+                            <li>1 scoop protein powder</li>
+                            <li>1 tbsp almond butter</li>
+                            <li>Berries + cinnamon</li>
+                        </ul>
+                        <span class="calories">~600 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Breakfast Tacos</h4>
+                        <ul>
+                            <li>2 breakfast tacos (egg, beans, avocado)</li>
+                            <li>1 apple</li>
+                            <li>12oz milk or OJ</li>
+                        </ul>
+                        <span class="calories">~650 cal</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🍔 MAINTENANCE LUNCH</h2>
+                    
+                    <div class="meal-option">
+                        <h4>School Cafeteria</h4>
+                        <ul>
+                            <li>1 entree with protein</li>
+                            <li>Vegetables</li>
+                            <li>Carb side</li>
+                            <li>Fruit</li>
+                            <li>Water</li>
+                        </ul>
+                        <span class="calories">700-800 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Packed Lunch</h4>
+                        <ul>
+                            <li>Turkey/chicken sandwich</li>
+                            <li>Apple or orange</li>
+                            <li>Carrots/veggies + hummus</li>
+                            <li>Greek yogurt or protein bar</li>
+                        </ul>
+                        <span class="calories">~700 cal</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🍖 MAINTENANCE DINNER</h2>
+                    
+                    <div class="meal-option">
+                        <h4>Standard Recovery Meal</h4>
+                        <ul>
+                            <li>6-8oz lean protein</li>
+                            <li>1.5-2 cups carbs</li>
+                            <li>2+ cups vegetables</li>
+                            <li>Moderate healthy fats</li>
+                        </ul>
+                        <span class="calories">800-900 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Example</h4>
+                        <ul>
+                            <li>8oz grilled chicken</li>
+                            <li>1.5 cups sweet potato</li>
+                            <li>Large serving broccoli</li>
+                            <li>Small side salad</li>
+                        </ul>
+                        <span class="calories">~850 cal</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>⚡ MAINTENANCE TIMING</h2>
+                    
+                    <div class="meal-option">
+                        <h4>Pre-Practice (2-3 hrs before)</h4>
+                        <ul>
+                            <li>Moderate carbs + protein</li>
+                            <li>Low fat (easier digestion)</li>
+                            <li>Example: Chicken + rice + fruit</li>
+                        </ul>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Pre-Practice (30-60 min)</h4>
+                        <ul>
+                            <li>Protein shake with fruit OR</li>
+                            <li>PB&J OR</li>
+                            <li>Greek yogurt + granola</li>
+                        </ul>
+                        <span class="calories">350-400 cal</span>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Post-Practice (Within 2 hrs)</h4>
+                        <ul>
+                            <li>Protein + carbs crucial</li>
+                            <li>Hydration + electrolytes</li>
+                            <li>This is often your dinner</li>
+                        </ul>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>Evening Snack</h4>
+                        <ul>
+                            <li>Casein shake OR</li>
+                            <li>Greek yogurt + berries OR</li>
+                            <li>Small bowl oatmeal</li>
+                        </ul>
+                        <span class="calories">300-350 cal</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="success-indicator">
+                <h4>✅ Signs You're On Track (Maintenance):</h4>
+                <ul style="list-style: none;">
+                    <li>✓ Weight stable (+/- 2lbs)</li>
+                    <li>✓ Performance consistent or improving</li>
+                    <li>✓ Recovery feels good</li>
+                    <li>✓ Energy throughout day</li>
+                    <li>✓ Not getting sick frequently</li>
+                    <li>✓ Strength maintained or increasing</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <h4>⚠️ Red Flags:</h4>
+                <ul style="list-style: none;">
+                    <li>✗ Losing weight unintentionally</li>
+                    <li>✗ Always exhausted</li>
+                    <li>✗ Performance dropping</li>
+                    <li>✗ Getting sick frequently</li>
+                    <li>✗ Strength declining</li>
+                    <li>✗ Can't recover between practices</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Supplements Protocol -->
+        <div id="supplements" class="protocol-content" style="display: none;">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>💊 TIER 1: ESSENTIALS</h2>
+                    <p style="color: #27ae60; font-weight: bold; margin-bottom: 1rem;">Everyone Should Consider</p>
+                    
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-1">TIER 1</span>
+                        <h4>Whey Protein Powder</h4>
+                        <p><strong>Why:</strong> Convenient protein, muscle recovery</p>
+                        <p><strong>Dosage:</strong> 1-2 scoops daily (25-50g)</p>
+                        <p><strong>Timing:</strong> Post-workout, between meals</p>
+                        <p><strong>Brands:</strong></p>
+                        <ul>
+                            <li>Optimum Nutrition Gold Standard (~$60/5lbs)</li>
+                            <li>MyProtein Impact Whey (~$45/5lbs)</li>
+                            <li>Orgain Organic (~$35/2lbs)</li>
+                        </ul>
+                        <p class="price-tag">~$50-60/month</p>
+                    </div>
+
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-1">TIER 1</span>
+                        <h4>Creatine Monohydrate</h4>
+                        <p><strong>Why:</strong> Most researched supplement ever, proven gains, brain benefits</p>
+                        <p><strong>Dosage:</strong> 5g daily (1 tsp)</p>
+                        <p><strong>Timing:</strong> Doesn't matter, just daily</p>
+                        <p><strong>Brands:</strong> Bulk Supplements (~$25 for 200 servings)</p>
+                        <p class="price-tag">~$2.50/month</p>
+                        <div style="background: rgba(39, 174, 96, 0.2); padding: 0.5rem; border-radius: 5px; margin-top: 0.5rem;">
+                            <strong>Note:</strong> Will add 2-5lbs water weight (GOOD for joints/performance)
+                        </div>
+                    </div>
+
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-1">TIER 1</span>
+                        <h4>Omega-3 Fish Oil</h4>
+                        <p><strong>Why:</strong> Reduces inflammation, joint health, brain function, recovery</p>
+                        <p><strong>Dosage:</strong> 2-3g combined EPA/DHA daily</p>
+                        <p><strong>Timing:</strong> With meals</p>
+                        <p><strong>Brands:</strong></p>
+                        <ul>
+                            <li>Nordic Naturals (~$40/month, high quality)</li>
+                            <li>Nature Made (~$25/month, good value)</li>
+                        </ul>
+                        <p class="price-tag">~$25-40/month</p>
+                    </div>
+
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-1">TIER 1</span>
+                        <h4>Vitamin D3</h4>
+                        <p><strong>Why:</strong> Most people deficient, immune system, bone health, testosterone</p>
+                        <p><strong>Dosage:</strong> 2000-5000 IU daily</p>
+                        <p><strong>Timing:</strong> With meals (fat-soluble)</p>
+                        <p class="price-tag">~$10 for 6 months</p>
+                    </div>
+
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-1">TIER 1</span>
+                        <h4>Magnesium Glycinate</h4>
+                        <p><strong>Why:</strong> Recovery, sleep quality, muscle function</p>
+                        <p><strong>Dosage:</strong> 300-400mg before bed</p>
+                        <p><strong>Timing:</strong> Evening</p>
+                        <p><strong>Brand:</strong> Doctor's Best (~$15/3 months)</p>
+                        <p class="price-tag">~$5/month</p>
+                        <div style="background: rgba(39, 174, 96, 0.2); padding: 0.5rem; border-radius: 5px; margin-top: 0.5rem;">
+                            <strong>Note:</strong> Glycinate form specifically - won't give you the shits
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>💪 TIER 2: WEIGHT GAIN SPECIFIC</h2>
+                    
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-2">TIER 2</span>
+                        <h4>Mass Gainer OR DIY</h4>
+                        <p><strong>Why:</strong> Calorie-dense protein + carbs for hardgainers</p>
+                        <p><strong>Store Options:</strong></p>
+                        <ul>
+                            <li>Optimum Serious Mass (~$50/12lbs, 1250 cal/serving)</li>
+                            <li>Naked Mass (~$65/8lbs, cleaner)</li>
+                        </ul>
+                        <p class="price-tag">~$40-65/month</p>
+                        
+                        <div style="background: rgba(233, 69, 96, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <h4 style="color: #e94560;">DIY MASS GAINER (CHEAPER & BETTER):</h4>
+                            <ul>
+                                <li>2 scoops whey protein</li>
+                                <li>1 cup oats (blend to powder)</li>
+                                <li>2 tbsp peanut butter</li>
+                                <li>1 banana</li>
+                                <li>16oz whole milk</li>
+                            </ul>
+                            <p style="color: #27ae60; font-weight: bold; margin-top: 0.5rem;">= ~1000 calories for $2-3 vs $4-5</p>
+                        </div>
+                    </div>
+
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-2">TIER 2</span>
+                        <h4>Casein Protein (Before Bed)</h4>
+                        <p><strong>Why:</strong> Slow-digesting protein feeds muscles overnight</p>
+                        <p><strong>Dosage:</strong> 1-2 scoops before bed</p>
+                        <p><strong>Brands:</strong> Optimum Gold Standard Casein (~$65/4lbs)</p>
+                        <p><strong>Budget Alternative:</strong> Full-fat cottage cheese</p>
+                        <p class="price-tag">~$40-50/month</p>
+                    </div>
+
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-2">TIER 2</span>
+                        <h4>Dextrose/Maltodextrin</h4>
+                        <p><strong>Why:</strong> Fast carbs post-workout, insulin spike, nutrient partitioning</p>
+                        <p><strong>Dosage:</strong> 50-75g immediately post-workout with protein</p>
+                        <p><strong>Brand:</strong> Bulk Supplements Dextrose (~$30/10lbs)</p>
+                        <p class="price-tag">~$10/month</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>⚡ TIER 3: PERFORMANCE</h2>
+                    
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-3">TIER 3</span>
+                        <h4>Beta-Alanine</h4>
+                        <p><strong>Why:</strong> Buffers lactic acid, improves high-intensity performance</p>
+                        <p><strong>Dosage:</strong> 3-5g daily</p>
+                        <p><strong>Note:</strong> Causes harmless tingling (normal)</p>
+                        <p class="price-tag">~$3/month</p>
+                    </div>
+
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-3">TIER 3</span>
+                        <h4>Electrolyte Powder</h4>
+                        <p><strong>Why:</strong> Hydration, performance, recovery (Texas heat!)</p>
+                        <p><strong>Dosage:</strong> 1-2 servings during/after practice</p>
+                        <p><strong>Brands:</strong></p>
+                        <ul>
+                            <li>LMNT (~$45/box, best ratios)</li>
+                            <li>Ultima (~$25, stevia)</li>
+                            <li>Liquid IV (~$25, has sugar)</li>
+                        </ul>
+                        <p class="price-tag">~$25-45/month</p>
+                        
+                        <div style="background: rgba(233, 69, 96, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <h4 style="color: #e94560;">DIY ELECTROLYTES:</h4>
+                            <ul>
+                                <li>1/4 tsp sea salt</li>
+                                <li>1/4 tsp "No Salt" (potassium)</li>
+                                <li>Squeeze lemon/lime</li>
+                                <li>32oz water</li>
+                            </ul>
+                            <p style="color: #27ae60; font-weight: bold;">= Basically FREE</p>
+                        </div>
+                    </div>
+
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-3">TIER 3</span>
+                        <h4>BCAAs</h4>
+                        <p><strong>Why:</strong> Reduce muscle breakdown, recovery</p>
+                        <p><strong>Dosage:</strong> 5-10g before/during/after training</p>
+                        <p><strong>Note:</strong> NOT essential if eating enough protein</p>
+                        <p class="price-tag">~$4/month</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🏥 TIER 4: RECOVERY & JOINTS</h2>
+                    
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-4">TIER 4</span>
+                        <h4>Collagen Peptides</h4>
+                        <p><strong>Why:</strong> Joint health, tendon recovery, injury prevention</p>
+                        <p><strong>Dosage:</strong> 15-20g daily</p>
+                        <p><strong>Timing:</strong> Morning or post-workout</p>
+                        <p><strong>Brands:</strong></p>
+                        <ul>
+                            <li>Vital Proteins (~$45/month)</li>
+                            <li>Sports Research (~$30/month)</li>
+                            <li>Great Lakes (~$25/month)</li>
+                        </ul>
+                        <p class="price-tag">~$25-45/month</p>
+                    </div>
+
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-4">TIER 4</span>
+                        <h4>Glucosamine + Chondroitin + MSM</h4>
+                        <p><strong>Why:</strong> Joint health, cartilage support</p>
+                        <p><strong>Dosage:</strong> 1500mg glucosamine daily</p>
+                        <p class="price-tag">~$10/month</p>
+                    </div>
+
+                    <div class="supplement-card">
+                        <span class="tier-badge tier-4">TIER 4</span>
+                        <h4>Turmeric/Curcumin</h4>
+                        <p><strong>Why:</strong> Natural anti-inflammatory, recovery</p>
+                        <p><strong>Dosage:</strong> 500-1000mg with BioPerine</p>
+                        <p class="price-tag">~$15/month</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>💰 COMPLETE STACK OPTIONS</h2>
+                    
+                    <div class="shopping-list">
+                        <h4>BUDGET STACK (~$50/month)</h4>
+                        <ul>
+                            <li>MyProtein Whey</li>
+                            <li>Creatine Monohydrate</li>
+                            <li>Fish Oil</li>
+                            <li>Vitamin D3</li>
+                            <li>DIY Mass Gainer Shakes</li>
+                        </ul>
+                    </div>
+
+                    <div class="shopping-list">
+                        <h4>SOLID STACK (~$100/month)</h4>
+                        <ul>
+                            <li>Quality Whey Protein</li>
+                            <li>Mass Gainer OR DIY</li>
+                            <li>Creatine</li>
+                            <li>Fish Oil</li>
+                            <li>Vitamin D3</li>
+                            <li>Magnesium Glycinate</li>
+                            <li>Electrolytes</li>
+                        </ul>
+                    </div>
+
+                    <div class="shopping-list">
+                        <h4>COMPLETE STACK (~$150/month)</h4>
+                        <ul>
+                            <li>Whey + Casein Protein</li>
+                            <li>Creatine</li>
+                            <li>Beta-Alanine</li>
+                            <li>Fish Oil</li>
+                            <li>Vitamin D3</li>
+                            <li>Magnesium Glycinate</li>
+                            <li>Collagen Peptides</li>
+                            <li>Electrolytes</li>
+                            <li>Glucosamine/MSM</li>
+                        </ul>
+                    </div>
+
+                    <div class="shopping-list">
+                        <h4>MAINTENANCE STACK (~$75/month)</h4>
+                        <ul>
+                            <li>Whey Protein</li>
+                            <li>Creatine</li>
+                            <li>Fish Oil</li>
+                            <li>Vitamin D3</li>
+                            <li>Magnesium Glycinate</li>
+                            <li>Electrolytes</li>
+                            <li>Collagen</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>⏰ SUPPLEMENT TIMING</h2>
+                    
+                    <div class="meal-option">
+                        <h4>MORNING</h4>
+                        <ul>
+                            <li>Creatine (5g)</li>
+                            <li>Vitamin D3</li>
+                            <li>Fish Oil</li>
+                            <li>Collagen (optional)</li>
+                        </ul>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>PRE-PRACTICE</h4>
+                        <ul>
+                            <li>Protein shake (if 2+ hrs since meal)</li>
+                            <li>Beta-Alanine (if using)</li>
+                        </ul>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>POST-PRACTICE</h4>
+                        <ul>
+                            <li>Whey Protein (25-50g)</li>
+                            <li>Fast carbs for weight gain</li>
+                            <li>Creatine (if not morning)</li>
+                        </ul>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>EVENING/BEFORE BED</h4>
+                        <ul>
+                            <li>Magnesium Glycinate</li>
+                            <li>Casein Protein (weight gain)</li>
+                            <li>Fish Oil (if not morning)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🛒 WHERE TO BUY</h2>
+                    
+                    <div class="meal-option">
+                        <h4>Cheapest to Most Expensive</h4>
+                        <ul>
+                            <li><strong>Amazon:</strong> Best prices with Subscribe & Save (15% off)</li>
+                            <li><strong>Bulk Supplements:</strong> Pure ingredients, no markup</li>
+                            <li><strong>MyProtein:</strong> 40-60% sales, set alerts</li>
+                            <li><strong>Costco/Sam's:</strong> Great for basics</li>
+                            <li><strong>GNC/Vitamin Shoppe:</strong> Overpriced, convenient</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>⚠️ RED FLAGS - AVOID THESE</h2>
+                    
+                    <div class="warning-box">
+                        <h4>Don't Waste Your Money:</h4>
+                        <ul style="list-style: none;">
+                            <li>✗ Proprietary Blends (can't see amounts)</li>
+                            <li>✗ Testosterone Boosters (don't work for teens)</li>
+                            <li>✗ Fat Burners (just caffeine, garbage)</li>
+                            <li>✗ Pre-workouts with crazy stimulants</li>
+                            <li>✗ "Steroid-Like Results" claims (bullshit)</li>
+                            <li>✗ SARMs, Prohormones (ILLEGAL, dangerous)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tips-box">
+                <h3>💊 Critical Supplement Truths</h3>
+                <ul>
+                    <li><strong>What supplements CAN'T do:</strong> Replace food, fix shitty diet, work without training/sleep</li>
+                    <li><strong>What supplements CAN do:</strong> Fill gaps, improve recovery, optimize performance at margins</li>
+                    <li><strong>80/20 Rule:</strong> 80% of results = food, training, sleep | 20% = supplements</li>
+                    <li><strong>But that 20% matters</strong> when you're competing</li>
+                    <li><strong>Drug Testing:</strong> All listed supplements are legal for UIL and won't show on tests</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Food Quality Protocol -->
+        <div id="food-quality" class="protocol-content" style="display: none;">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>🌟 FERMENTED FOODS - THE SECRET WEAPON</h2>
+                    <p style="color: #27ae60; font-weight: bold;">Gut health = Immune system = Recovery = Performance</p>
+                    
+                    <div class="meal-option">
+                        <h4>Why Fermented Foods Are Gold:</h4>
+                        <ul>
+                            <li>Pre-digested nutrients = easier absorption</li>
+                            <li>Natural probiotics = better digestion</li>
+                            <li>Reduces inflammation</li>
+                            <li>Ancient foods humans thrived on</li>
+                        </ul>
+                    </div>
+
+                    <div class="supplement-card">
+                        <h4>1. Sourdough Bread</h4>
+                        <span class="food-quality-badge premium">PREMIUM</span>
+                        <ul>
+                            <li>Way easier to digest than regular bread</li>
+                            <li>Lower glycemic impact</li>
+                            <li>Great with grass-fed butter</li>
+                            <li>Get from local bakeries or HEB bakery section</li>
+                            <li>Check ingredients: flour, water, salt, starter ONLY</li>
+                        </ul>
+                    </div>
+
+                    <div class="supplement-card">
+                        <h4>2. Kefir (Drinkable Yogurt)</h4>
+                        <span class="food-quality-badge premium">PREMIUM</span>
+                        <ul>
+                            <li>10-30 probiotic strains vs yogurt's 2-3</li>
+                            <li>Most lactose already broken down</li>
+                            <li>Lifeway brand at any store</li>
+                            <li>Drink straight or add to smoothies</li>
+                        </ul>
+                    </div>
+
+                    <div class="supplement-card">
+                        <h4>3. Greek Yogurt (Full-Fat)</h4>
+                        <span class="food-quality-badge premium">PREMIUM</span>
+                        <ul>
+                            <li>Live cultures support gut health</li>
+                            <li>High protein</li>
+                            <li>Fage, Siggi's, Chobani</li>
+                            <li>Grass-fed when possible</li>
+                        </ul>
+                    </div>
+
+                    <div class="supplement-card">
+                        <h4>4. Sauerkraut/Kimchi</h4>
+                        <span class="food-quality-badge premium">PREMIUM</span>
+                        <ul>
+                            <li>Incredible for gut health</li>
+                            <li>Small serving with meals</li>
+                            <li>Get refrigerated (live cultures)</li>
+                            <li>Not shelf-stable versions</li>
+                        </ul>
+                    </div>
+
+                    <div class="supplement-card">
+                        <h4>5. Real Fermented Pickles</h4>
+                        <span class="food-quality-badge solid">SOLID</span>
+                        <ul>
+                            <li>Bubbies brand or farmers market</li>
+                            <li>Great snack</li>
+                            <li>Helps with electrolytes</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🥩 PROTEIN QUALITY HIERARCHY</h2>
+                    
+                    <div class="supplement-card">
+                        <h4 style="color: #27ae60;">TIER 1 - PREMIUM (Get When Possible)</h4>
+                        
+                        <div class="meal-option">
+                            <h4>Wild Game</h4>
+                            <span class="food-quality-badge premium">BEST</span>
+                            <ul>
+                                <li><strong>Venison, Elk, Wild Boar</strong></li>
+                                <li>Highest protein density</li>
+                                <li>Best fat profile (omega-3 rich)</li>
+                                <li>NO hormones, antibiotics, bullshit</li>
+                                <li>If you hunt or know hunters: HAMMER THIS</li>
+                                <li>Most hunters have freezers full, love sharing</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>Wild-Caught Fish</h4>
+                            <span class="food-quality-badge premium">BEST</span>
+                            <ul>
+                                <li><strong>Salmon, Mackerel, Sardines</strong></li>
+                                <li>Omega-3s off the charts</li>
+                                <li>Best for recovery and brain</li>
+                                <li>HEB has decent wild salmon</li>
+                                <li>Frozen wild > fresh farmed</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>Grass-Fed/Finished Beef</h4>
+                            <span class="food-quality-badge premium">BEST</span>
+                            <ul>
+                                <li>Better omega-3 to omega-6 ratio</li>
+                                <li>More nutrients than grain-fed</li>
+                                <li>Central Market, Whole Foods, local ranches</li>
+                                <li>When budget allows</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="supplement-card">
+                        <h4 style="color: #f39c12;">TIER 2 - SOLID EVERYDAY</h4>
+                        
+                        <div class="meal-option">
+                            <h4>Regular Beef/Bison</h4>
+                            <span class="food-quality-badge solid">SOLID</span>
+                            <ul>
+                                <li>Better amino acid profile than chicken</li>
+                                <li>2-3x/week minimum</li>
+                                <li>More iron, zinc, B vitamins</li>
+                                <li>Ground beef cheap and versatile</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>Pasture-Raised Chicken/Eggs</h4>
+                            <span class="food-quality-badge solid">SOLID</span>
+                            <ul>
+                                <li>Better than conventional when budget allows</li>
+                                <li>HEB has Vital Farms eggs (worth it)</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>Regular Chicken</h4>
+                            <span class="food-quality-badge solid">SOLID</span>
+                            <ul>
+                                <li>Still good, just not ONLY protein</li>
+                                <li>Cheap, accessible, easy</li>
+                                <li>Mix it up with red meat and fish</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="supplement-card">
+                        <h4 style="color: #95a5a6;">TIER 3 - CONVENIENCE (Occasional)</h4>
+                        
+                        <div class="meal-option">
+                            <h4>Chick-fil-A/Chipotle</h4>
+                            <span class="food-quality-badge convenience">OCCASIONAL</span>
+                            <ul>
+                                <li>Better than most fast food</li>
+                                <li>Maybe 2-3x/week MAX</li>
+                                <li>DO THE SENSITIVITY CHECK</li>
+                                <li>Notice how you feel 2-3 hrs after</li>
+                            </ul>
+                        </div>
+
+                        <div class="warning-box">
+                            <h4>The Body Check:</h4>
+                            <p>Eat it, notice how you feel for 2-3 hours after:</p>
+                            <ul style="list-style: none;">
+                                <li>✓ Feel fine = occasional is okay</li>
+                                <li>✗ Feel like shit = your body is smarter than convenience</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🥑 HEALTHY FATS HIERARCHY</h2>
+                    <p style="color: #4a90e2; margin-bottom: 1rem;">Your brain is 60% fat. Hormones made from fat. Fat doesn't make you fat.</p>
+                    
+                    <div class="supplement-card">
+                        <h4>TIER 1 FATS (Use Daily)</h4>
+                        
+                        <div class="meal-option">
+                            <h4>1. Grass-Fed Butter</h4>
+                            <span class="food-quality-badge premium">BEST</span>
+                            <ul>
+                                <li><strong>Kerrygold</strong> at any grocery store</li>
+                                <li>On sourdough toast</li>
+                                <li>On potatoes, rice, vegetables</li>
+                                <li>Vitamin K2, omega-3s, CLA</li>
+                                <li>Yellow = better quality</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>2. Avocado (Texas Superfood)</h4>
+                            <span class="food-quality-badge premium">BEST</span>
+                            <ul>
+                                <li>Whole avocado daily = perfect</li>
+                                <li>On anything and everything</li>
+                                <li>More potassium than bananas</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>3. Olive Oil (EVOO, Cold-Pressed)</h4>
+                            <span class="food-quality-badge premium">BEST</span>
+                            <ul>
+                                <li>Salad dressings</li>
+                                <li>Drizzle on cooked food</li>
+                                <li>NOT high-heat cooking</li>
+                                <li>Anti-inflammatory</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>4. Avocado Oil (High-Heat)</h4>
+                            <span class="food-quality-badge premium">BEST</span>
+                            <ul>
+                                <li>Pan-frying, roasting</li>
+                                <li>More stable than olive oil</li>
+                                <li>Chosen Foods brand</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>5. Coconut Oil</h4>
+                            <span class="food-quality-badge solid">SOLID</span>
+                            <ul>
+                                <li>Baking, some cooking</li>
+                                <li>MCT-rich (quick energy)</li>
+                                <li>Good pre-workout</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>6. Nuts/Nut Butters</h4>
+                            <span class="food-quality-badge solid">SOLID</span>
+                            <ul>
+                                <li>Raw or dry-roasted, unsalted best</li>
+                                <li>Natural peanut/almond butter</li>
+                                <li>Ingredients: nuts, maybe salt</li>
+                                <li>AVOID Jif/Skippy (hydrogenated oils)</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>7. Egg Yolks</h4>
+                            <span class="food-quality-badge premium">BEST</span>
+                            <ul>
+                                <li>DON'T throw these away</li>
+                                <li>Cholesterol = hormone production</li>
+                                <li>All vitamins in the yolk</li>
+                                <li>Whole eggs > egg whites</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <h4>⚠️ AVOID THESE FATS:</h4>
+                        <ul style="list-style: none;">
+                            <li>✗ Vegetable/Canola/Soybean oil (inflammatory omega-6 bombs)</li>
+                            <li>✗ Margarine (fake butter = not food)</li>
+                            <li>✗ Hydrogenated anything</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🥔 CARB HIERARCHY</h2>
+                    <p style="color: #27ae60; font-weight: bold; margin-bottom: 1rem;">ALL WINNERS - Hammer These All Day</p>
+                    
+                    <div class="meal-option">
+                        <h4>1. Potatoes (White, Red, Golden)</h4>
+                        <span class="food-quality-badge premium">PERFECT</span>
+                        <ul>
+                            <li>Perfect post-workout</li>
+                            <li>High potassium</li>
+                            <li>Cheap as hell</li>
+                            <li>Versatile (baked, roasted, mashed)</li>
+                        </ul>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>2. Sweet Potatoes (Orange, Purple, White)</h4>
+                        <span class="food-quality-badge premium">PERFECT</span>
+                        <ul>
+                            <li>More micronutrients than white</li>
+                            <li>Vitamin A off the charts</li>
+                            <li>Slightly lower glycemic</li>
+                        </ul>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>3. White Rice (Jasmine, Basmati)</h4>
+                        <span class="food-quality-badge premium">PERFECT</span>
+                        <ul>
+                            <li>Easy to digest</li>
+                            <li>Great for weight gain</li>
+                            <li>Perfect with every meal</li>
+                        </ul>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>4. Rice Noodles</h4>
+                        <span class="food-quality-badge solid">SOLID</span>
+                        <ul>
+                            <li>Gluten-free</li>
+                            <li>Easy to digest</li>
+                            <li>Quick cooking</li>
+                        </ul>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>5. Sourdough Bread</h4>
+                        <span class="food-quality-badge premium">BEST BREAD</span>
+                        <ul>
+                            <li>Best bread option</li>
+                            <li>Easier digestion</li>
+                            <li>Great with grass-fed butter</li>
+                        </ul>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>6. Oats</h4>
+                        <span class="food-quality-badge solid">SOLID</span>
+                        <ul>
+                            <li>Breakfast staple</li>
+                            <li>High fiber</li>
+                            <li>Mix with protein powder</li>
+                        </ul>
+                    </div>
+
+                    <div class="meal-option">
+                        <h4>7. FRUIT - EAT A LOT</h4>
+                        <span class="food-quality-badge premium">UNLIMITED</span>
+                        <ul>
+                            <li>Bananas (2-4 daily for weight gain)</li>
+                            <li>Apples (with nut butter)</li>
+                            <li>Oranges (vitamin C for recovery)</li>
+                            <li>Berries (antioxidants, less sugar)</li>
+                            <li>Watermelon (hydration + carbs)</li>
+                            <li>Grapes (easy snacking)</li>
+                        </ul>
+                        <div style="background: rgba(39, 174, 96, 0.2); padding: 0.5rem; border-radius: 5px; margin-top: 0.5rem;">
+                            <strong>You can eat fruit all day.</strong> It's whole food with fiber, not the same as candy.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🌱 ORGANIC - WHEN IT MATTERS</h2>
+                    
+                    <div class="supplement-card">
+                        <h4 style="color: #27ae60;">Priority for Organic (If Budget Allows):</h4>
+                        <ul>
+                            <li>Berries (strawberries, blueberries - heavy pesticides)</li>
+                            <li>Leafy greens (spinach, kale)</li>
+                            <li>Apples</li>
+                            <li>Eggs (or pasture-raised minimum)</li>
+                            <li>Dairy (grass-fed > organic > conventional)</li>
+                        </ul>
+                    </div>
+
+                    <div class="supplement-card">
+                        <h4 style="color: #95a5a6;">Don't Stress About Organic:</h4>
+                        <ul>
+                            <li>Avocados (thick skin protects)</li>
+                            <li>Bananas (same)</li>
+                            <li>Potatoes (conventional fine)</li>
+                            <li>Rice, oats (minimal concern)</li>
+                        </ul>
+                    </div>
+
+                    <div class="tips-box">
+                        <h3>The Rule:</h3>
+                        <p>Organic when you can, especially for daily large quantities. But:</p>
+                        <p style="color: #e94560; font-weight: bold; font-size: 1.2rem;">Conventional whole foods > Organic processed foods > Conventional processed foods</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🦌 WILD GAME - THE SECRET WEAPON</h2>
+                    
+                    <div class="success-indicator">
+                        <h4>If You Hunt or Know Hunters:</h4>
+                        
+                        <div class="meal-option">
+                            <h4>Venison (Deer)</h4>
+                            <span class="food-quality-badge premium">BEST</span>
+                            <ul>
+                                <li>Leanest, highest protein-to-fat ratio</li>
+                                <li>26g protein per 100g vs beef's 25g</li>
+                                <li>More iron and B vitamins</li>
+                                <li>ZERO hormones, antibiotics</li>
+                                <li>Tastes amazing if cooked right</li>
+                                <li>Ground venison, backstrap, stew meat</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>Elk/Wild Boar</h4>
+                            <span class="food-quality-badge premium">BEST</span>
+                            <ul>
+                                <li>Similar benefits to venison</li>
+                                <li>Slightly different flavor</li>
+                                <li>If you can get it, eat it</li>
+                            </ul>
+                        </div>
+
+                        <div class="meal-option">
+                            <h4>Duck/Wild Turkey</h4>
+                            <span class="food-quality-badge premium">BEST</span>
+                            <ul>
+                                <li>More fat than chicken</li>
+                                <li>Better nutrient profile</li>
+                                <li>Duck = high selenium, B vitamins</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="tips-box">
+                        <h3>💡 How to Get Wild Game:</h3>
+                        <ul>
+                            <li>Know someone who hunts? ASK THEM</li>
+                            <li>Most hunters have freezers full, love sharing</li>
+                            <li>Parents might know someone</li>
+                            <li>Texas has A LOT of hunters</li>
+                            <li>Offer to trade (help them, they'll give you meat)</li>
+                            <li>Some butcher shops sell wild game</li>
+                            <li>Build these connections = FREE premium protein</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tips-box">
+                <h3>🎯 The Reality Check on Food Quality</h3>
+                <p style="font-size: 1.1rem; margin-bottom: 1rem;"><strong>Perfect is the enemy of good.</strong></p>
+                <ul>
+                    <li>Grass-fed steak everyday? Not realistic for most budgets</li>
+                    <li>Wild salmon every meal? Nope</li>
+                    <li>All organic everything? Probably not happening</li>
+                </ul>
+                <h4 style="margin-top: 1rem; color: #e94560;">The Strategy:</h4>
+                <ul>
+                    <li>Get premium stuff when you can (one good meal/day)</li>
+                    <li>Wild game when available (zero cost if you hunt)</li>
+                    <li>Regular grocery meat still good (way better than processed)</li>
+                    <li>Focus on WHOLE FOODS first, quality second</li>
+                    <li>Listen to your body's response</li>
+                </ul>
+                <p style="color: #27ae60; font-weight: bold; font-size: 1.2rem; margin-top: 1rem;">80% whole foods, home-cooked = WINS | 20% convenience = not gonna kill you</p>
+                <p style="color: #e94560; font-weight: bold;">But flip that ratio and you'll feel and perform like shit.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function switchProtocol(protocol) {
+            // Hide all protocol contents
+            document.querySelectorAll('.protocol-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.protocol-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected protocol
+            document.getElementById(protocol).style.display = 'block';
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Initialize with weight-gain protocol visible
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('weight-gain').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
